@@ -63,6 +63,25 @@ export interface PurchaseRequest {
   createdAt: string;
 }
 
+export interface PurchaseSubscription {
+  id: string;
+  userId: string;
+  requestId: string;
+  createdAt: string;
+}
+
+export interface ArrivalNotification {
+  id: string;
+  userId: string;
+  subscriptionId: string;
+  requestId: string;
+  bookId?: string | null;
+  isRead: boolean;
+  createdAt: string;
+  book?: Book | null;
+  request?: PurchaseRequest;
+}
+
 export type ReviewType = 'positive' | 'neutral' | 'negative';
 
 export interface Review {

@@ -21,16 +21,81 @@
         <span>{{ request.requester.name || request.requester.department || '匿名' }}</span>
       </div>
     </div>
+    <div
+      v-if="canSubscribe"
+      class="purchase-actions"
+    >
+      <van-button
+        size="small"
+        round
+        :type="subscribed ? 'warning' : 'default'"
+        :icon="subscribed ? 'bell' : 'bell-o'"
+        :loading="submitting"
+        @click="onToggleSubscribe"
+      >
+        {{ subscribed ? '已订阅到货提醒' : '到货提醒' }}
+      </van-button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { showToast, showConfirmDialog } from 'vant';
 import type { PurchaseRequest } from '@/types';
 import { categoryMap } from '@/types';
+import { subscribeRequest, unsubscribeRequest } from '@/api/purchase';
+import { useAuthStore } from '@/store/auth';
 
-defineProps<{
+const props = defineProps<{
   request: PurchaseRequest;
+  subscribed?: boolean;
 }>();
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const innerSubscribed = ref(!!props.subscribed);
+const submitting = ref(false);
+
+// 仅登录用户、求购开放中、且不是求购发布者本人时展示订阅入口
+const canSubscribe = computed(
+  () =>
+    authStore.isAuthenticated &&
+    props.request.status === 'active' &&
+    props.request.requesterId !== authStore.user?.id
+);
+
+const onToggleSubscribe = async () => {
+  if (!authStore.isAuthenticated) {
+    router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } });
+    return;
+  }
+
+  try {
+    if (innerSubscribed.value) {
+      await showConfirmDialog({
+        title: '退订到货提醒',
+        message: `退订后将不再收到《${props.request.bookTitle}》的到货通知，确定退订吗？`,
+        confirmButtonText: '退订',
+      });
+      submitting.value = true;
+      await unsubscribeRequest(props.request.id);
+      innerSubscribed.value = false;
+      showToast('已退订');
+    } else {
+      submitting.value = true;
+      await subscribeRequest(props.request.id);
+      innerSubscribed.value = true;
+      showToast('订阅成功，到货后通知你');
+    }
+  } catch {
+    // 用户取消确认弹窗或请求失败，提示已由拦截器处理
+  } finally {
+    submitting.value = false;
+  }
+};
 </script>
 
 <style scoped>
@@ -74,5 +139,10 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: 4px;
+}
+.purchase-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>

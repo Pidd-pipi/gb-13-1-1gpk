@@ -5,8 +5,20 @@ import { Review } from './Review';
 import { Favorite } from './Favorite';
 import { PurchaseRequest } from './PurchaseRequest';
 import { BrowsingHistory } from './BrowsingHistory';
+import { PurchaseSubscription } from './PurchaseSubscription';
+import { ArrivalNotification } from './ArrivalNotification';
 
-export const entities = [User, Book, Message, Review, Favorite, PurchaseRequest, BrowsingHistory];
+export const entities = [
+  User,
+  Book,
+  Message,
+  Review,
+  Favorite,
+  PurchaseRequest,
+  BrowsingHistory,
+  PurchaseSubscription,
+  ArrivalNotification,
+];
 
 export * from './User';
 export { Book };
@@ -17,3 +29,5 @@ export * from './Favorite';
 export { PurchaseRequest };
 export type { RequestStatus, SubjectCategory as PurchaseRequestSubjectCategory } from './PurchaseRequest';
 export * from './BrowsingHistory';
+export * from './PurchaseSubscription';
+export * from './ArrivalNotification';

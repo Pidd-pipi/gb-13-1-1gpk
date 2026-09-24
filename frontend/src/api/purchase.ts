@@ -1,5 +1,5 @@
 import request from './request';
-import type { PurchaseRequest, SubjectCategory } from '@/types';
+import type { PurchaseRequest, PurchaseSubscription, SubjectCategory } from '@/types';
 
 export const createPurchaseRequest = (data: {
   bookTitle: string;
@@ -29,4 +29,18 @@ export const getMyPurchaseRequests = () => {
 
 export const closePurchaseRequest = (id: string) => {
   return request.put(`/purchase-requests/${id}/close`);
+};
+
+export const subscribeRequest = (id: string) => {
+  return request.post<{ subscribed: boolean; subscriptionId: string }>(
+    `/purchase-requests/${id}/subscribe`
+  );
+};
+
+export const unsubscribeRequest = (id: string) => {
+  return request.delete<{ subscribed: boolean }>(`/purchase-requests/${id}/subscribe`);
+};
+
+export const getMySubscriptions = () => {
+  return request.get<PurchaseSubscription[]>('/my/subscriptions');
 };

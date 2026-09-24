@@ -19,6 +19,17 @@ import {
   getMyPurchaseRequests,
   closePurchaseRequest,
 } from '../controllers/purchaseRequest.controller';
+import {
+  subscribeRequest,
+  unsubscribeRequest,
+  getMySubscriptions,
+} from '../controllers/subscription.controller';
+import {
+  getMyNotifications,
+  getUnreadNotificationCount,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from '../controllers/notification.controller';
 import { sendMessage, getConversations, getMessages, getUnreadCount } from '../controllers/message.controller';
 import { createReview, getUserReviews as getUserReviewsPublic } from '../controllers/review.controller';
 
@@ -50,6 +61,17 @@ router.get('/purchase-requests', getPurchaseRequests);
 router.post('/purchase-requests', authMiddleware, createPurchaseRequest);
 router.get('/my/purchase-requests', authMiddleware, getMyPurchaseRequests);
 router.put('/purchase-requests/:id/close', authMiddleware, closePurchaseRequest);
+
+// 到货提醒：求购订阅 / 退订 / 我的订阅
+router.post('/purchase-requests/:id/subscribe', authMiddleware, subscribeRequest);
+router.delete('/purchase-requests/:id/subscribe', authMiddleware, unsubscribeRequest);
+router.get('/my/subscriptions', authMiddleware, getMySubscriptions);
+
+// 到货提醒：通知列表 / 未读数 / 标记已读
+router.get('/my/notifications', authMiddleware, getMyNotifications);
+router.get('/my/notifications/unread-count', authMiddleware, getUnreadNotificationCount);
+router.put('/my/notifications/read-all', authMiddleware, markAllNotificationsRead);
+router.put('/my/notifications/:id/read', authMiddleware, markNotificationRead);
 
 router.post('/messages', authMiddleware, upload.array('images', 5), sendMessage);
 router.get('/messages/conversations', authMiddleware, getConversations);

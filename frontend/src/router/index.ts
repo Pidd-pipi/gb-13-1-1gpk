@@ -74,6 +74,12 @@ const routes = [
     component: () => import('@/pages/Favorites.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/notifications',
+    name: 'Notifications',
+    component: () => import('@/pages/Notifications.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({

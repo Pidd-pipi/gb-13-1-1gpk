@@ -17,6 +17,7 @@
         v-for="item in requests"
         :key="item.id"
         :request="item"
+        :subscribed="subscribedIds.has(item.id)"
       />
       <van-empty v-else description="暂无求购信息" />
     </div>
@@ -26,13 +27,26 @@
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { getPurchaseRequests } from '@/api/purchase';
+import { getPurchaseRequests, getMySubscriptions } from '@/api/purchase';
 import PurchaseCard from '@/components/PurchaseCard.vue';
+import { useAuthStore } from '@/store/auth';
 import type { PurchaseRequest, SubjectCategory } from '@/types';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const loading = ref(false);
 const requests = ref<PurchaseRequest[]>([]);
+const subscribedIds = ref<Set<string>>(new Set());
+
+const fetchSubscriptions = async () => {
+  if (!authStore.isAuthenticated) return;
+  try {
+    const list = await getMySubscriptions();
+    subscribedIds.value = new Set(list.map((s) => s.requestId));
+  } catch {
+    // 获取失败时静默处理
+  }
+};
 
 const filters = reactive({
   category: '' as SubjectCategory | '',
@@ -66,7 +80,10 @@ const goPublish = () => {
 };
 
 watch(() => filters.category, fetchRequests);
-onMounted(fetchRequests);
+onMounted(() => {
+  fetchRequests();
+  fetchSubscriptions();
+});
 </script>
 
 <style scoped>

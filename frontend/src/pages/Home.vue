@@ -57,6 +57,7 @@
             v-for="item in purchaseRequests"
             :key="item.id"
             :request="item"
+            :subscribed="subscribedIds.has(item.id)"
           />
           <van-empty v-else description="暂无求购信息" />
         </div>
@@ -77,7 +78,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getBooks, getRecommendBooks } from '@/api/book';
-import { getPurchaseRequests } from '@/api/purchase';
+import { getPurchaseRequests, getMySubscriptions } from '@/api/purchase';
 import { useAuthStore } from '@/store/auth';
 import BookCard from '@/components/BookCard.vue';
 import PurchaseCard from '@/components/PurchaseCard.vue';
@@ -94,6 +95,17 @@ const loadingRequests = ref(false);
 const latestBooks = ref<Book[]>([]);
 const recommendBooks = ref<Book[]>([]);
 const purchaseRequests = ref<PurchaseRequest[]>([]);
+const subscribedIds = ref<Set<string>>(new Set());
+
+const fetchSubscriptions = async () => {
+  if (!authStore.isAuthenticated) return;
+  try {
+    const list = await getMySubscriptions();
+    subscribedIds.value = new Set(list.map((s) => s.requestId));
+  } catch {
+    // 未登录或获取失败时静默处理
+  }
+};
 
 const fetchLatestBooks = async () => {
   loadingBooks.value = true;
@@ -145,6 +157,7 @@ onMounted(() => {
   fetchLatestBooks();
   fetchRecommendBooks();
   fetchPurchaseRequests();
+  fetchSubscriptions();
 });
 </script>
 
