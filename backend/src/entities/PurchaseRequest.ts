@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, Index } from 'typeorm';
 import { User } from './User';
+import { RequestSubscription } from './RequestSubscription';
 
 export type SubjectCategory = 'science' | 'humanities' | 'business' | 'arts' | 'other';
 export type RequestStatus = 'active' | 'closed';
@@ -43,6 +44,9 @@ export class PurchaseRequest {
   @Column()
   @Index('idx_request_requester')
   requesterId: string;
+
+  @OneToMany(() => RequestSubscription, subscription => subscription.request)
+  subscriptions: RequestSubscription[];
 
   @CreateDateColumn()
   @Index('idx_request_created')

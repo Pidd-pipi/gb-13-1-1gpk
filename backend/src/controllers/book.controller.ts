@@ -7,6 +7,7 @@ import { Favorite } from '../entities/Favorite';
 import { BrowsingHistory } from '../entities/BrowsingHistory';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { minioService } from '../services/minio.service';
+import { notifySubscribersForNewBook } from '../services/stockNotification.service';
 
 export const createBook = async (req: AuthenticatedRequest, res: Response) => {
   const {
@@ -56,6 +57,14 @@ export const createBook = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     await bookRepository.save(book);
+
+    // 匹配进行中的求购订阅，给订阅者发送到货提醒（失败不影响上架主流程）
+    try {
+      await notifySubscribersForNewBook(book);
+    } catch (notifyError) {
+      console.error('到货提醒发送失败:', notifyError);
+    }
+
     res.status(201).json({ message: '发布成功', book });
   } catch (error) {
     console.error(error);

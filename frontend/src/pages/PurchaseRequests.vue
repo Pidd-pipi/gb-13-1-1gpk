@@ -5,11 +5,11 @@
         <van-icon name="plus" size="20" @click="goPublish" />
       </template>
     </van-nav-bar>
-    
+
     <van-dropdown-menu>
       <van-dropdown-item v-model="filters.category" :options="categoryOptions" title="分类" />
     </van-dropdown-menu>
-    
+
     <div class="requests-list">
       <van-loading v-if="loading" />
       <PurchaseCard
@@ -17,6 +17,10 @@
         v-for="item in requests"
         :key="item.id"
         :request="item"
+        :subscribed="subscribedIds.has(item.id)"
+        :loading="togglingId === item.id"
+        :can-subscribe="authStore.isAuthenticated && item.status === 'active' && item.requesterId !== authStore.user?.id"
+        @toggle="toggleSubscription(item)"
       />
       <van-empty v-else description="暂无求购信息" />
     </div>
@@ -27,12 +31,16 @@
 import { ref, reactive, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getPurchaseRequests } from '@/api/purchase';
+import { useAuthStore } from '@/store/auth';
+import { useSubscriptions } from '@/composables/useSubscriptions';
 import PurchaseCard from '@/components/PurchaseCard.vue';
 import type { PurchaseRequest, SubjectCategory } from '@/types';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const loading = ref(false);
 const requests = ref<PurchaseRequest[]>([]);
+const { subscribedIds, togglingId, fetchSubscriptions, toggleSubscription } = useSubscriptions();
 
 const filters = reactive({
   category: '' as SubjectCategory | '',
@@ -62,11 +70,18 @@ const fetchRequests = async () => {
 };
 
 const goPublish = () => {
+  if (!authStore.isAuthenticated) {
+    router.push('/login');
+    return;
+  }
   router.push('/publish-request');
 };
 
 watch(() => filters.category, fetchRequests);
-onMounted(fetchRequests);
+onMounted(() => {
+  fetchRequests();
+  fetchSubscriptions();
+});
 </script>
 
 <style scoped>

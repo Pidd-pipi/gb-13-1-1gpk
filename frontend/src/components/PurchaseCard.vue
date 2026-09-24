@@ -8,6 +8,9 @@
     <div class="purchase-meta" v-if="request.author">
       <span>作者：{{ request.author }}</span>
     </div>
+    <div class="purchase-meta" v-if="request.isbn">
+      <span>ISBN：{{ request.isbn }}</span>
+    </div>
     <div class="purchase-meta" v-if="request.expectedPrice">
       <span class="price">期望价格：¥{{ request.expectedPrice }}</span>
     </div>
@@ -21,6 +24,29 @@
         <span>{{ request.requester.name || request.requester.department || '匿名' }}</span>
       </div>
     </div>
+    <div v-if="canSubscribe" class="purchase-actions">
+      <van-button
+        v-if="subscribed"
+        plain
+        type="primary"
+        size="small"
+        icon="bell"
+        :loading="loading"
+        @click="emit('toggle')"
+      >
+        已订阅 · 退订
+      </van-button>
+      <van-button
+        v-else
+        type="primary"
+        size="small"
+        icon="bell-o"
+        :loading="loading"
+        @click="emit('toggle')"
+      >
+        到货提醒
+      </van-button>
+    </div>
   </div>
 </template>
 
@@ -30,6 +56,13 @@ import { categoryMap } from '@/types';
 
 defineProps<{
   request: PurchaseRequest;
+  subscribed?: boolean;
+  loading?: boolean;
+  canSubscribe?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'toggle'): void;
 }>();
 </script>
 
@@ -74,5 +107,10 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: 4px;
+}
+.purchase-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>

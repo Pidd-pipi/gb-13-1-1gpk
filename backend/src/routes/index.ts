@@ -19,6 +19,17 @@ import {
   getMyPurchaseRequests,
   closePurchaseRequest,
 } from '../controllers/purchaseRequest.controller';
+import {
+  subscribeRequest,
+  unsubscribeRequest,
+  getMySubscriptions,
+} from '../controllers/subscription.controller';
+import {
+  getNotifications,
+  getUnreadNotificationCount,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from '../controllers/notification.controller';
 import { sendMessage, getConversations, getMessages, getUnreadCount } from '../controllers/message.controller';
 import { createReview, getUserReviews as getUserReviewsPublic } from '../controllers/review.controller';
 
@@ -50,6 +61,14 @@ router.get('/purchase-requests', getPurchaseRequests);
 router.post('/purchase-requests', authMiddleware, createPurchaseRequest);
 router.get('/my/purchase-requests', authMiddleware, getMyPurchaseRequests);
 router.put('/purchase-requests/:id/close', authMiddleware, closePurchaseRequest);
+router.post('/purchase-requests/:id/subscribe', authMiddleware, subscribeRequest);
+router.delete('/purchase-requests/:id/subscribe', authMiddleware, unsubscribeRequest);
+router.get('/my/subscriptions', authMiddleware, getMySubscriptions);
+
+router.get('/notifications', authMiddleware, getNotifications);
+router.get('/notifications/unread-count', authMiddleware, getUnreadNotificationCount);
+router.put('/notifications/:id/read', authMiddleware, markNotificationRead);
+router.put('/notifications/read-all', authMiddleware, markAllNotificationsRead);
 
 router.post('/messages', authMiddleware, upload.array('images', 5), sendMessage);
 router.get('/messages/conversations', authMiddleware, getConversations);

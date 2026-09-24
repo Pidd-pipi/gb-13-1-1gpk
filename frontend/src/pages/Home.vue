@@ -57,6 +57,10 @@
             v-for="item in purchaseRequests"
             :key="item.id"
             :request="item"
+            :subscribed="subscribedIds.has(item.id)"
+            :loading="togglingId === item.id"
+            :can-subscribe="authStore.isAuthenticated && item.status === 'active' && item.requesterId !== authStore.user?.id"
+            @toggle="toggleSubscription(item)"
           />
           <van-empty v-else description="暂无求购信息" />
         </div>
@@ -79,12 +83,14 @@ import { useRouter } from 'vue-router';
 import { getBooks, getRecommendBooks } from '@/api/book';
 import { getPurchaseRequests } from '@/api/purchase';
 import { useAuthStore } from '@/store/auth';
+import { useSubscriptions } from '@/composables/useSubscriptions';
 import BookCard from '@/components/BookCard.vue';
 import PurchaseCard from '@/components/PurchaseCard.vue';
 import type { Book, PurchaseRequest } from '@/types';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { subscribedIds, togglingId, fetchSubscriptions, toggleSubscription } = useSubscriptions();
 const activeTab = ref(0);
 const activeTabbar = ref(0);
 
@@ -145,6 +151,7 @@ onMounted(() => {
   fetchLatestBooks();
   fetchRecommendBooks();
   fetchPurchaseRequests();
+  fetchSubscriptions();
 });
 </script>
 

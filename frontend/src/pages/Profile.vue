@@ -25,6 +25,11 @@
       <van-cell title="我发布的" icon="shop-o" is-link @click="router.push('/my-books')" />
       <van-cell title="我的收藏" icon="star-o" is-link @click="router.push('/favorites')" />
       <van-cell title="求购信息" icon="notes-o" is-link @click="router.push('/purchase-requests')" />
+      <van-cell title="到货提醒" icon="bell" is-link @click="router.push('/notifications')">
+        <template #value>
+          <van-badge v-if="unreadCount > 0" :content="unreadCount" />
+        </template>
+      </van-cell>
       <van-cell title="我的评价" icon="comment-o" is-link @click="showReviews" />
     </van-cell-group>
     
@@ -62,11 +67,21 @@ import { useRouter } from 'vue-router';
 import { showDialog, showToast } from 'vant';
 import { useAuthStore } from '@/store/auth';
 import { updateProfile } from '@/api/auth';
+import { getUnreadNotificationCount } from '@/api/notification';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const activeTab = ref(4);
 const showEdit = ref(false);
+const unreadCount = ref(0);
+
+const fetchUnreadCount = async () => {
+  if (!authStore.isAuthenticated) return;
+  try {
+    const result = await getUnreadNotificationCount();
+    unreadCount.value = result.count;
+  } catch {}
+};
 
 const editForm = reactive({
   name: '',
@@ -114,6 +129,7 @@ const logout = () => {
 onMounted(() => {
   if (authStore.isAuthenticated) {
     authStore.fetchCurrentUser();
+    fetchUnreadCount();
   }
 });
 </script>
